@@ -1,0 +1,86 @@
+﻿@model OnlineAPI.Entities.Task
+@{
+    ViewData["Title"] = "Создать задачу";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создать задачу - TaskFlow</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/css/taskboard.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="logo">
+                <h1><i class="fas fa-tasks"></i> <span>TaskFlow</span></h1>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="@Url.Action("Index", "Tasks")"><i class="fas fa-th-large"></i> <span>Доска</span></a></li>
+                <li><a href="@Url.Action("Create", "Tasks")" class="active"><i class="fas fa-plus"></i> <span>Создать задачу</span></a></li>
+            </ul>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="user-actions">
+                    <div class="avatar">AK</div>
+                </div>
+            </div>
+
+            <div class="board-header">
+                <div class="board-title">
+                    <h2>Создание новой задачи</h2>
+                </div>
+                <div class="board-actions">
+                    <a href="@Url.Action("Index", "Tasks")" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Назад к доске</a>
+                </div>
+            </div>
+
+            <div style="padding: 25px; max-width: 600px;">
+                <form method="post" asp-action = "Create" asp-controller = "Tasks" class="task-form">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label asp-for="Title">Название задачи *</label>
+                        <input asp-for="Title" class="form-control" placeholder="Введите название задачи" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Description">Описание</label>
+                        <textarea asp-for="Description" class="form-control" placeholder="Опишите детали задачи"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Priority">Приоритет</label>
+                        <select asp-for="Priority" class="form-control" asp-items="Html.GetEnumSelectList<OnlineAPI.Entities.TaskPriority>()">
+                        </select>
+                        <span asp-validation-for="Priority" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Assignee">Исполнитель</label>
+                        <select asp-for="Assignee" class="form-control">
+                            <option value="AK">Алексей К. (AK)</option>
+                            <option value="MP">Мария П. (MP)</option>
+                            <option value="IV">Иван В. (IV)</option>
+                        </select>
+                        <span asp-validation-for="Assignee" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="@Url.Action("Index", "Tasks")" class="btn btn-outline">Отмена</a>
+                        <button type="submit" class="btn btn-primary">Создать задачу</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
