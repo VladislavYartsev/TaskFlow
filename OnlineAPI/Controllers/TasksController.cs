@@ -19,26 +19,43 @@ namespace OnlineAPI.Controllers
             }
 
         [HttpGet]
-        [HttpGet]
         public async Task<IActionResult> Index(int projectId)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            // Проверяем доступ к проекту
-            var hasAccess = await _context.ProjectMembers
-                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
-
-            if (!hasAccess)
-            {
-                TempData["ErrorMessage"] = "У вас нет доступа к этому проекту";
-                return RedirectToAction("Index", "Projects");
-            }
 
             var project = await _context.Projects.FindAsync(projectId);
             var tasks = await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
 
             ViewBag.Project = project;
             return View(tasks);
+        }
+        // GET: Tasks/Create
+        [HttpGet]
+        public async Task<IActionResult> Create(int projectId)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            // Проверяем доступ к проекту
+            var hasAccess = await _context.ProjectMembers
+                .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+            Console.WriteLine($"{userId} {projectId}");
+
+            if (!hasAccess)
+            {
+                Console.WriteLine("Ошибка");
+                TempData["ErrorMessage"] = "У вас нет доступа к этому проекту";
+                return RedirectToAction("Index", "Projects");
+            }
+
+            var project = await _context.Projects.FindAsync(projectId);
+            ViewBag.Project = project;
+
+            var task = new Entities.Task
+            {
+                ProjectId = projectId
+            };
+
+            return View(task);
         }
 
         // POST: Tasks/Create
