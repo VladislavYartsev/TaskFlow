@@ -21,7 +21,7 @@
             </div>
             <ul class="nav-menu">
                 <li><a href="@Url.Action("Index", "Tasks")"><i class="fas fa-th-large"></i> <span>Доска</span></a></li>
-                <li><a href="@Url.Action("Create", "Tasks")" class="active"><i class="fas fa-plus"></i> <span>Создать задачу</span></a></li>
+                <li><a href="@Url.Action("Create", "Tasks", new { projectId = ViewBag.ProjectId })" class="active"><i class="fas fa-plus"></i> <span>Создать задачу</span></a></li>
             </ul>
         </div>
 
@@ -73,6 +73,7 @@
                         </select>
                         <span asp-validation-for="Assignee" class="text-danger"></span>
                     </div>
+                    <input type="hidden" asp-for="ProjectId" value="@ViewBag.ProjectId" />
 
                     <div class="form-actions">
                         <a href="@Url.Action("Index", "Tasks")" class="btn btn-outline">Отмена</a>

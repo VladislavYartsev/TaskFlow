@@ -107,7 +107,7 @@
                 </div>
                 <div class="board-actions">
                     <button class="btn btn-outline"><i class="fas fa-filter"></i> Фильтр</button>
-                    <a href="@Url.Action("Create", "Tasks")" class="btn btn-primary">
+                    <a href="@Url.Action("Create", "Tasks", new { projectId = ViewBag.ProjectId })" class="btn btn-primary">
                         <i class="fas fa-plus"></i> Создать задачу
                     </a>
                 </div>
@@ -131,7 +131,7 @@
                             <span class="task-count">@Model.Count(t => t.Status == OnlineAPI.Entities.TaskStatus.ToDo)</span>
                         </div>
                         <div class="add-task">
-                            <a href="@Url.Action("Create", "Tasks")"><i class="fas fa-plus"></i></a>
+                            <a href="@Url.Action("Create", "Tasks", new { projectId = ViewBag.ProjectId })"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                     <div class="tasks-container">
@@ -214,7 +214,7 @@
                             <span class="task-count">@Model.Count(t => t.Status == OnlineAPI.Entities.TaskStatus.Review)</span>
                         </div>
                         <div class="add-task">
-                            <a href="@Url.Action("Create", "Tasks")"><i class="fas fa-plus"></i></a>
+                            <a href="@Url.Action("Create", "Tasks", new {ProjectId = ViewBag.ProjectId})"><i class="fas fa-plus"></i></a>
                         </div>
                     </div>
                     <div class="tasks-container">

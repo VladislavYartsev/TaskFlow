@@ -44,7 +44,6 @@ namespace OnlineAPI.Entities
             [StringLength(10)]
             public string? TaskCode { get; set; }
             public int ProjectId { get; set; }
-            public Project Project { get; set; }
     }
 
         public class TaskMoveRequest

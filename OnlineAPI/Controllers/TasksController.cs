@@ -18,7 +18,7 @@ namespace OnlineAPI.Controllers
                 _context = context;
             }
 
-        [HttpGet]
+
         [HttpGet]
         public async Task<IActionResult> Index(int projectId)
         {
@@ -37,16 +37,28 @@ namespace OnlineAPI.Controllers
             var project = await _context.Projects.FindAsync(projectId);
             var tasks = await _context.Tasks.Where(t => t.ProjectId == projectId).ToListAsync();
 
-            ViewBag.Project = project;
+            ViewBag.ProjectId = projectId;
             return View(tasks);
         }
+        
+        [HttpGet]
+        public IActionResult Create(int projectId)
+        {
+            var project = _context.Projects.Find(projectId);
+            if (project == null)
+            {
+                return NotFound();
+            }
+            ViewBag.ProjectId = projectId;
 
-        // POST: Tasks/Create
+            return View();
+        }
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Entities.Task task)
         {
             Console.WriteLine("=== CREATE ACTION STARTED ===");
+            Console.WriteLine($"ProjectId from form: {task.ProjectId}");
 
             if (!ModelState.IsValid)
             {
@@ -59,8 +71,7 @@ namespace OnlineAPI.Controllers
                         Console.WriteLine($"Field: {key}, Error: {error.ErrorMessage}");
                     }
                 }
-
-
+                ViewBag.ProjectId = task.ProjectId;
                 return View(task);
             }
 
@@ -68,24 +79,34 @@ namespace OnlineAPI.Controllers
             {
                 Console.WriteLine("=== TRYING TO SAVE ===");
 
-                // Генерация кода задачи
+                var project = await _context.Projects.FindAsync(task.ProjectId);
+                if (project == null)
+                {
+                    ModelState.AddModelError("ProjectId", "Указанный проект не существует");
+                    ViewBag.ProjectId = task.ProjectId;
+                    return View(task);
+                }
+
+
                 var lastTask = await _context.Tasks.OrderByDescending(t => t.Id).FirstOrDefaultAsync();
                 var nextId = lastTask?.Id + 1 ?? 1;
                 task.TaskCode = $"TASK-{nextId}";
                 task.Status = Entities.TaskStatus.ToDo;
                 task.CreatedDate = DateTime.UtcNow;
 
+
                 _context.Add(task);
                 await _context.SaveChangesAsync();
 
                 Console.WriteLine("=== SAVE SUCCESSFUL ===");
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"=== EXCEPTION: {ex.Message} ===");
                 Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
                 ModelState.AddModelError("", $"Ошибка при сохранении: {ex.Message}");
+                ViewBag.ProjectId = task.ProjectId;
                 return View(task);
             }
         }
