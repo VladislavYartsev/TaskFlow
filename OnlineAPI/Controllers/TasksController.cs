@@ -92,7 +92,7 @@ namespace OnlineAPI.Controllers
                 var nextId = lastTask?.Id + 1 ?? 1;
                 task.TaskCode = $"TASK-{nextId}";
                 task.Status = Entities.TaskStatus.ToDo;
-                task.CreatedDate = DateTime.UtcNow;
+
 
 
                 _context.Add(task);
@@ -174,7 +174,7 @@ namespace OnlineAPI.Controllers
                             throw;
                         }
                     }
-                    return RedirectToAction(nameof(Index));
+                    return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
                 }
                 return View(task);
             }
@@ -197,7 +197,7 @@ namespace OnlineAPI.Controllers
                 _context.Update(task);
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
             }
 
             // GET: Tasks/Delete/5 
@@ -226,7 +226,7 @@ namespace OnlineAPI.Controllers
                 var task = await _context.Tasks.FindAsync(id);
                 _context.Tasks.Remove(task);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
             }
 
             private bool TaskExists(int id)

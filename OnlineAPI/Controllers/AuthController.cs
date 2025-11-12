@@ -67,7 +67,6 @@ namespace OnlineAPI.Controllers
                 return RedirectToAction("Index", "Tasks");
             }
 
-            ModelState.AddModelError(string.Empty, "Неверное имя пользователя или пароль");
             return View(model);
         }
 

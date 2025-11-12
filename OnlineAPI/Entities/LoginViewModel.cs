@@ -6,6 +6,7 @@ namespace OnlineAPI.Entities
     public class LoginViewModel
     {
         [Required(ErrorMessage = "Имя пользователя обязательно")]
+
         public string Username { get; set; }
 
         [Required(ErrorMessage = "Пароль обязателен")]
