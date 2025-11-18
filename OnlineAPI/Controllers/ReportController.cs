@@ -41,7 +41,7 @@ namespace OnlineAPI.Controllers
         {
             int totalTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId);
             int completedTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId && t.Status == Entities.TaskStatus.Done);
-            
+            Console.WriteLine(totalTasks);
 
             var metrics = new
             {

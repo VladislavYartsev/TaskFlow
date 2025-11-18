@@ -30,6 +30,7 @@ namespace OnlineAPI.Entities
     public enum ProjectRole
     {
         Owner,
+        Admin,
         Member,
         Viewer
     }

@@ -347,9 +347,9 @@
             const reportType = document.getElementById('reportType').value;
 
             try {
-                // Здесь будет запрос к вашему API
-                // const response = await fetch(`/api/reports/${@Model}?period=${period}&type=${reportType}`);
-                // const data = await response.json();
+                
+                const response = await fetch(`/api/reports/${@Model}`);
+                const data = await response.json();
 
                 // Временные демо-данные
                
@@ -488,7 +488,7 @@
             }
 
             charts.priorityChart = new Chart(ctx, {
-                type: 'pie',
+                type: 'pie',    
                 data: {
                     labels: distribution.map(item => item.priority),
                     datasets: [{
