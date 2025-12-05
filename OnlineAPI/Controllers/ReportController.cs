@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OnlineAPI.Entities;
+using System.Runtime.InteropServices;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
@@ -41,15 +42,23 @@ namespace OnlineAPI.Controllers
         {
             int totalTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId);
             int completedTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId && t.Status == Entities.TaskStatus.Done);
-            Console.WriteLine(totalTasks);
+
+            // Исправляем расчет процента
+            double completionRate = totalTasks > 0 ? Math.Round((double)completedTasks / totalTasks * 100, 1) : 0;
 
             var metrics = new
             {
                 totalTasks = totalTasks,
                 completedTasks = completedTasks,
-                completionRate = totalTasks/100*completedTasks, // Рассчитайте на основе данных
+                completionRate = completionRate,
                 avgCompletionTime = 3.2,
-                trends = new { tasks = 12, completed = 8, rate = 5, time = -10 }
+                trends = new
+                {
+                    tasks = totalTasks,
+                    completed = completedTasks,
+                    rate = completionRate,
+                    time = -10
+                }
             };
 
             return Ok(metrics);
@@ -89,7 +98,7 @@ namespace OnlineAPI.Controllers
             return Ok(distribution);
         }
 
-        private string GetStatusColor(Entities.TaskStatus status)
+        private static string GetStatusColor(Entities.TaskStatus status)
         {
             return status switch
             {
@@ -100,7 +109,7 @@ namespace OnlineAPI.Controllers
             };
         }
 
-        private string GetPriorityColor(TaskPriority priority)
+        private static string GetPriorityColor(TaskPriority priority)
         {
             return priority switch
             {

@@ -1,7 +1,14 @@
 ﻿@model OnlineAPI.Entities.ProjectSettingsViewModel
 @{
+    
     ViewData["Title"] = "Настройки проекта";
     Layout = null;
+
+    // Безопасные значения по умолчанию
+    var projectId = Model?.Id ?? 0;
+    var canEdit = Model?.CanEdit ?? false;
+    var modelName = Model?.Name ?? "Неизвестный проект";
+    var modelDescription = Model?.Description ?? string.Empty;
 }
 
 <!DOCTYPE html>
@@ -204,7 +211,7 @@
             </div>
             <ul class="nav-menu">
                 <li><a href="@Url.Action("Index", "Projects")"><i class="fas fa-layer-group"></i> <span>Проекты</span></a></li>
-                <li><a href="@Url.Action("Index", "Tasks", new { projectId = Model.Id })"><i class="fas fa-list-check"></i> <span>Задачи</span></a></li>
+                <li><a href="@Url.Action("Index", "Tasks", new { projectId = Model.Id })"><i class="fas fa-list-check"></i> <span>Доска</span></a></li>
                 <li><a href="@Url.Action("Index", "Reports", new { projectId = Model.Id })"><i class="fas fa-chart-pie"></i> <span>Отчеты</span></a></li>
                 <li><a href="@Url.Action("Index", "ProjectSettings", new { projectId = Model.Id })" class="active"><i class="fas fa-cog"></i> <span>Настройки</span></a></li>
             </ul>
@@ -325,16 +332,15 @@
                     </div>
 
                     <div class="members-list">
-                        @foreach (var member in Model.Members)
+                        @foreach (var member in Model?.Members)
                         {
                             <div class="member-item">
                                 <div class="member-info">
                                     <div class="member-avatar">
-                                        @member.DisplayName[0].ToString().ToUpper()
+                                        @(member?.UserName?[0].ToString().ToUpper() ?? "?")
                                     </div>
                                     <div class="member-details">
-                                        <div class="member-name">@member.DisplayName</div>
-                                        <div class="member-email">@member.Email</div>
+                                        <div class="member-name">@member.UserName</div>
                                     </div>
                                 </div>
                                 <div class="member-role">
