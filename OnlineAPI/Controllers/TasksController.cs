@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using OnlineAPI.Entities;
 using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace OnlineAPI.Controllers
 {
@@ -42,7 +44,7 @@ namespace OnlineAPI.Controllers
         }
         
         [HttpGet]
-        public IActionResult Create(int projectId)
+        public async Task<IActionResult> Create(int projectId)
         {
             var project = _context.Projects.Find(projectId);
             if (project == null)
@@ -50,7 +52,8 @@ namespace OnlineAPI.Controllers
                 return NotFound();
             }
             ViewBag.ProjectId = projectId;
-
+            ViewBag.Members = await GetProjectMembers(projectId);
+                
             return View();
         }
         [HttpPost]
@@ -176,7 +179,8 @@ namespace OnlineAPI.Controllers
                     }
                     return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
                 }
-                return View(task);
+            ViewBag.Members = await GetProjectMembers(task.ProjectId);
+            return View(task);
             }
 
             // POST: Tasks/Move
@@ -233,5 +237,18 @@ namespace OnlineAPI.Controllers
             {
                 return _context.Tasks.Any(e => e.Id == id);
             }
+        private async Task<List<SelectListItem>> GetProjectMembers(int projectId)
+        {
+            return await _context.ProjectMembers
+                .Where(m => m.ProjectId == projectId)
+                .Select(m => new SelectListItem
+                {
+                    Value = m.Id.ToString(),
+                    Text = m.UserName
+                })
+                .ToListAsync();
         }
+
+
+    }
 }

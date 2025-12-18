@@ -66,10 +66,7 @@
 
                     <div class="form-group">
                         <label asp-for="Assignee">Исполнитель</label>
-                        <select asp-for="Assignee" class="form-control">
-                            <option value="AK">Алексей К. (AK)</option>
-                            <option value="MP">Мария П. (MP)</option>
-                            <option value="IV">Иван В. (IV)</option>
+                        <select asp-for="Assignee" class="form-control" asp-items="ViewBag.Members">
                         </select>
                         <span asp-validation-for="Assignee" class="text-danger"></span>
                     </div>
