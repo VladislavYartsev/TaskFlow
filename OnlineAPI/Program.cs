@@ -10,25 +10,37 @@ namespace OnlineAPI
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Добавление сервисов в контейнер
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<AppContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCookie(options =>
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = "UserScheme";
+                options.DefaultChallengeScheme = "UserScheme";
+            })
+
+
+                .AddCookie("UserScheme", options =>
                 {
                     options.LoginPath = "/Auth/Login";
                     options.AccessDeniedPath = "/Auth/AccessDenied";
                     options.ExpireTimeSpan = TimeSpan.FromDays(30);
                     options.SlidingExpiration = true;
+                })
+                
+                .AddCookie("SuperAdminScheme", options =>
+                {
+                    options.LoginPath = "/SuperAdmin/Login";
+                    options.AccessDeniedPath = "/SuperAdmin/AccessDenied";
+                    options.ExpireTimeSpan = TimeSpan.FromHours(8);
                 });
 
             builder.Services.AddAuthorization();
 
+
             var app = builder.Build();
 
-            // Настройка конвейера HTTP запросов
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -45,14 +57,14 @@ namespace OnlineAPI
                 name: "default",
                 pattern: "{controller=Tasks}/{action=Index}/{id?}");
 
-            // Инициализация базы данных
+
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
                 try
                 {
                     var context = services.GetRequiredService<AppContext>();
-                    context.Database.Migrate(); // Применяем миграции
+                    context.Database.Migrate();
                 }
                 catch (Exception ex)
                 {

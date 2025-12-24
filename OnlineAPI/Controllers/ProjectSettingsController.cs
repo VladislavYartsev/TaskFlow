@@ -24,7 +24,6 @@ namespace OnlineAPI.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Получаем проект с участниками
             var project = await _context.Projects
                 .Include(p => p.Members)
                 .FirstOrDefaultAsync(p => p.Id == projectId);
@@ -35,7 +34,6 @@ namespace OnlineAPI.Controllers
                 return RedirectToAction("Index", "Projects");
             }
 
-            // Проверяем доступ
             var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
             if (userMember == null)
             {
@@ -116,14 +114,12 @@ namespace OnlineAPI.Controllers
                 return Json(new { success = false, message = "Проект не найден" });
             }
 
-            // Только владелец может менять роли
             var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
             if (currentUserMember?.Role != ProjectRole.Owner)
             {
                 return Json(new { success = false, message = "Только владелец проекта может изменять роли" });
             }
 
-            // Нельзя менять роль владельца или самого себя
             var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
             if (targetMember == null)
             {
@@ -135,7 +131,6 @@ namespace OnlineAPI.Controllers
                 return Json(new { success = false, message = "Нельзя изменить роль владельца или свою собственную роль" });
             }
 
-            // Обновляем роль
             targetMember.Role = request.NewRole;
             _context.ProjectMembers.Update(targetMember);
             await _context.SaveChangesAsync();
@@ -177,7 +172,6 @@ namespace OnlineAPI.Controllers
                 return Json(new { success = false, message = "Нельзя удалить владельца или себя из проекта" });
             }
 
-            // Удаляем участника
             _context.ProjectMembers.Remove(targetMember);
             await _context.SaveChangesAsync();
 

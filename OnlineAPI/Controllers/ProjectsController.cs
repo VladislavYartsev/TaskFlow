@@ -26,7 +26,6 @@ namespace OnlineAPI.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userName = User.Identity.Name;
 
-            // Получаем проекты, где пользователь является владельцем или участником
             var userProjects = await _context.ProjectMembers
                 .Where(pm => pm.UserId == userId)
                 .Include(pm => pm.Project)
@@ -60,7 +59,6 @@ namespace OnlineAPI.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Проверяем, может ли пользователь создать еще один проект
             var ownedProjectsCount = _context.Projects.Count(p => p.OwnerId == userId);
             if (ownedProjectsCount >= MAX_OWNED_PROJECTS)
             {
@@ -84,7 +82,6 @@ namespace OnlineAPI.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var userName = User.Identity.Name;
 
-            // Проверяем лимит проектов
             var ownedProjectsCount = await _context.Projects.CountAsync(p => p.OwnerId == userId);
             if (ownedProjectsCount >= MAX_OWNED_PROJECTS)
             {
@@ -106,7 +103,6 @@ namespace OnlineAPI.Controllers
                 _context.Projects.Add(project);
                 await _context.SaveChangesAsync();
 
-                // Добавляем создателя как владельца проекта
                 var projectMember = new ProjectMember
                 {
                     ProjectId = project.Id,
@@ -135,7 +131,6 @@ namespace OnlineAPI.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Проверяем, имеет ли пользователь доступ к проекту
             var projectMember = await _context.ProjectMembers
                 .Include(pm => pm.Project)
                     .ThenInclude(p => p.Members)

@@ -139,6 +139,17 @@
                 font-size: 14px;
                 color: #666;
             }
+
+        .alert-error {
+            background: #fdecea;
+            color: #611a15;
+            border: 1px solid #f5c2c7;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
     </style>
 </head>
 <body>
@@ -150,17 +161,15 @@
         <form method="post" asp-action="Login" asp-controller="Auth">
             @Html.AntiForgeryToken()
 
-            @if (!ViewData.ModelState.IsValid)
+            @if (ViewData.ModelState.ContainsKey("") &&
+                        ViewData.ModelState[""]!.Errors.Any())
             {
-                <div class="validation-summary-errors">
-                    <ul>
-                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-                        {
-                            <li>@error.ErrorMessage</li>
-                        }
-                    </ul>
+                <div class="alert-error">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    Неверный логин или пароль
                 </div>
             }
+
 
             <div class="form-group">
                 <label asp-for="Username">Имя пользователя</label>
@@ -173,7 +182,6 @@
                 <input asp-for="Password" type="password" class="form-control" placeholder="Введите пароль" />
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-
             <div class="checkbox-group">
                 <input asp-for="RememberMe" type="checkbox" />
                 <label asp-for="RememberMe">Запомнить меня</label>
@@ -181,7 +189,23 @@
 
             <button type="submit" class="btn">Войти в систему</button>
         </form>
-
+        <div style="margin-top:20px; text-align:center;">
+            <a href="@Url.Action("Register", "Auth")"
+               style="
+           display:block;
+           padding:12px;
+           border-radius:6px;
+           text-decoration:none;
+           font-weight:600;
+           color:#667eea;
+           border:2px solid #667eea;
+           transition:all 0.2s;
+       "
+               onmouseover="this.style.background='#667eea'; this.style.color='white';"
+               onmouseout="this.style.background='transparent'; this.style.color='#667eea';">
+                Регистрация по приглашению
+            </a>
+        </div>
         <div class="demo-accounts">
             <h4>Демо-аккаунты:</h4>
             <p><strong>admin / admin123</strong> - Администратор</p>

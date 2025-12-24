@@ -13,6 +13,7 @@ namespace OnlineAPI
         public DbSet<Entities.User> Users { get; set; }
         
         public DbSet<Entities.ProjectMember> ProjectMembers { get; set; }
+        public DbSet<Entities.Invitation> Invitations { get; set; }
 
 
     }

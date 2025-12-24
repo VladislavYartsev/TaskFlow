@@ -19,10 +19,8 @@ namespace OnlineAPI.Entities
 
         public DateTime UpdatedDate { get; set; }
 
-        // Навигационное свойство для задач проекта
         public ICollection<Entities.Task> Tasks { get; set; } = new List<Entities.Task>();
 
-        // Навигационное свойство для участников проекта
         public ICollection<ProjectMember> Members { get; set; } = new List<ProjectMember>();
     }
 

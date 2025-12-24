@@ -342,7 +342,7 @@
             loadReports();
         });
 
-        // Функция загрузки отчетов
+        
         async function loadReports() {
                   const period = document.getElementById('periodSelect').value;
             const reportType = document.getElementById('reportType').value;
@@ -350,19 +350,16 @@
             try {
                 const projectId = @Model;
 
-                // 1. Загружаем основные метрики
                 const metricsResponse = await fetch(`/Reports/GetProjectMetrics?projectId=${projectId}&period=${period}`);
                 const metrics = await metricsResponse.json();
 
-                // 2. Загружаем распределение по статусам
+             
                 const statusResponse = await fetch(`/Reports/GetStatusDistribution?projectId=${projectId}`);
                 const statusDistribution = await statusResponse.json();
 
-                // 3. Загружаем распределение по приоритетам
                 const priorityResponse = await fetch(`/Reports/GetPriorityDistribution?projectId=${projectId}`);
                 const priorityDistribution = await priorityResponse.json();
 
-                // Обновляем метрики
                 updateMetrics(metrics);
 
                 createCharts({

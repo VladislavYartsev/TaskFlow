@@ -36,14 +36,12 @@ namespace OnlineAPI.Controllers
             return View(projectId);
         }
 
-        // API методы для данных отчетов
         [HttpGet]
         public async Task<IActionResult> GetProjectMetrics(int projectId, string period = "30")
         {
             int totalTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId);
             int completedTasks = await _context.Tasks.CountAsync(t => t.ProjectId == projectId && t.Status == Entities.TaskStatus.Done);
 
-            // Исправляем расчет процента
             double completionRate = totalTasks > 0 ? Math.Round((double)completedTasks / totalTasks * 100, 1) : 0;
 
             var metrics = new
