@@ -1,181 +1,181 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using OnlineAPI.Entities;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using System.Linq;
-using OnlineAPI.Entities;
+﻿    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.EntityFrameworkCore;
+    using OnlineAPI.Entities;
+    using System.Security.Claims;
+    using System.Threading.Tasks;
+    using System.Linq;
+    using OnlineAPI.Entities;
 
-namespace OnlineAPI.Controllers
-{
-    [Authorize]
-    public class ProjectSettingsController : Controller
+    namespace OnlineAPI.Controllers
     {
-        private readonly AppContext _context;
-
-        public ProjectSettingsController(AppContext context)
+        [Authorize]
+        public class ProjectSettingsController : Controller
         {
-            _context = context;
-        }
+            private readonly AppContext _context;
 
-        [HttpGet]
-        public async Task<IActionResult> Index(int projectId)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == projectId);
-
-            if (project == null)
+            public ProjectSettingsController(AppContext context)
             {
-                TempData["ErrorMessage"] = "Проект не найден";
-                return RedirectToAction("Index", "Projects");
+                _context = context;
             }
 
-            var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
-            if (userMember == null)
+            [HttpGet]
+            public async Task<IActionResult> Index(int projectId)
             {
-                TempData["ErrorMessage"] = "У вас нет доступа к этому проекту";
-                return RedirectToAction("Index", "Projects");
-            }
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var isOwner = userMember.Role == ProjectRole.Owner;
-            var canEdit = isOwner || userMember.Role == ProjectRole.Admin;
+                var project = await _context.Projects
+                    .Include(p => p.Members)
+                    .FirstOrDefaultAsync(p => p.Id == projectId);
 
-            var viewModel = new ProjectSettingsViewModel
-            {
-                Id = project.Id,
-                Name = project.Name,
-                Description = project.Description ?? "",
-                IsOwner = isOwner,
-                CanEdit = canEdit,
-                Members = project.Members.Select(m => new ProjectMemberViewModel
+                if (project == null)
                 {
-                    UserId = m.UserId,
-                    UserName = m.UserName,
-                    Role = m.Role.ToString(),
-                    IsCurrentUser = m.UserId == userId,
-                    CanChangeRole = isOwner && m.Role != ProjectRole.Owner && m.UserId != userId
-                }).ToList()
-            };
+                    TempData["ErrorMessage"] = "Проект не найден";
+                    return RedirectToAction("Index", "Projects");
+                }
 
-            return View(viewModel);
-        }
+                var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
+                if (userMember == null)
+                {
+                    TempData["ErrorMessage"] = "У вас нет доступа к этому проекту";
+                    return RedirectToAction("Index", "Projects");
+                }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateProject(UpdateProjectRequest request)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var isOwner = userMember.Role == ProjectRole.Owner;
+                var canEdit = isOwner || userMember.Role == ProjectRole.Admin;
 
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
+                var viewModel = new ProjectSettingsViewModel
+                {
+                    Id = project.Id,
+                    Name = project.Name,
+                    Description = project.Description ?? "",
+                    IsOwner = isOwner,
+                    CanEdit = canEdit,
+                    Members = project.Members.Select(m => new ProjectMemberViewModel
+                    {
+                        UserId = m.UserId,
+                        UserName = m.UserName,
+                        Role = m.Role.ToString(),
+                        IsCurrentUser = m.UserId == userId,
+                        CanChangeRole = isOwner && m.Role != ProjectRole.Owner && m.UserId != userId
+                    }).ToList()
+                };
 
-            if (project == null)
-            {
-                return Json(new { success = false, message = "Проект не найден" });
+                return View(viewModel);
             }
 
-            // Проверяем права
-            var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
-            var canEdit = userMember?.Role == ProjectRole.Owner|| userMember?.Role == ProjectRole.Admin;
-
-            if (!canEdit)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> UpdateProject(UpdateProjectRequest request)
             {
-                return Json(new { success = false, message = "Недостаточно прав для редактирования проекта" });
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var project = await _context.Projects
+                    .Include(p => p.Members)
+                    .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
+
+                if (project == null)
+                {
+                    return Json(new { success = false, message = "Проект не найден" });
+                }
+
+                // Проверяем права
+                var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
+                var canEdit = userMember?.Role == ProjectRole.Owner|| userMember?.Role == ProjectRole.Admin;
+
+                if (!canEdit)
+                {
+                    return Json(new { success = false, message = "Недостаточно прав для редактирования проекта" });
+                }
+
+                // Обновляем проект
+                project.Name = request.Name;
+                project.Description = request.Description;
+                project.UpdatedDate = DateTime.UtcNow;
+
+                _context.Projects.Update(project);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Настройки проекта обновлены" });
             }
 
-            // Обновляем проект
-            project.Name = request.Name;
-            project.Description = request.Description;
-            project.UpdatedDate = DateTime.UtcNow;
-
-            _context.Projects.Update(project);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Настройки проекта обновлены" });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateMemberRole(UpdateMemberRoleRequest request)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
-
-            if (project == null)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> UpdateMemberRole(UpdateMemberRoleRequest request)
             {
-                return Json(new { success = false, message = "Проект не найден" });
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var project = await _context.Projects
+                    .Include(p => p.Members)
+                    .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
+
+                if (project == null)
+                {
+                    return Json(new { success = false, message = "Проект не найден" });
+                }
+
+                var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
+                if (currentUserMember?.Role != ProjectRole.Owner)
+                {
+                    return Json(new { success = false, message = "Только владелец проекта может изменять роли" });
+                }
+
+                var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
+                if (targetMember == null)
+                {
+                    return Json(new { success = false, message = "Участник не найден" });
+                }
+
+                if (targetMember.Role == ProjectRole.Owner || request.UserId == userId)
+                {
+                    return Json(new { success = false, message = "Нельзя изменить роль владельца или свою собственную роль" });
+                }
+
+                targetMember.Role = request.NewRole;
+                _context.ProjectMembers.Update(targetMember);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Роль участника обновлена" });
             }
 
-            var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
-            if (currentUserMember?.Role != ProjectRole.Owner)
+            [HttpPost]
+            [ValidateAntiForgeryToken]
+            public async Task<IActionResult> RemoveMember(RemoveMemberRequest request)
             {
-                return Json(new { success = false, message = "Только владелец проекта может изменять роли" });
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                var project = await _context.Projects
+                    .Include(p => p.Members)
+                    .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
+
+                if (project == null)
+                {
+                    return Json(new { success = false, message = "Проект не найден" });
+                }
+
+                // Только владелец может удалять участников
+                var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
+                if (currentUserMember?.Role != ProjectRole.Owner)
+                {
+                    return Json(new { success = false, message = "Только владелец проекта может удалять участников" });
+                }
+
+                // Нельзя удалить владельца или самого себя
+                var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
+                if (targetMember == null)
+                {
+                    return Json(new { success = false, message = "Участник не найден" });
+                }
+
+                if (targetMember.Role == ProjectRole.Owner || request.UserId == userId)
+                {
+                    return Json(new { success = false, message = "Нельзя удалить владельца или себя из проекта" });
+                }
+
+                _context.ProjectMembers.Remove(targetMember);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, message = "Участник удален из проекта" });
             }
-
-            var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
-            if (targetMember == null)
-            {
-                return Json(new { success = false, message = "Участник не найден" });
-            }
-
-            if (targetMember.Role == ProjectRole.Owner || request.UserId == userId)
-            {
-                return Json(new { success = false, message = "Нельзя изменить роль владельца или свою собственную роль" });
-            }
-
-            targetMember.Role = request.NewRole;
-            _context.ProjectMembers.Update(targetMember);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Роль участника обновлена" });
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RemoveMember(RemoveMemberRequest request)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            var project = await _context.Projects
-                .Include(p => p.Members)
-                .FirstOrDefaultAsync(p => p.Id == request.ProjectId);
-
-            if (project == null)
-            {
-                return Json(new { success = false, message = "Проект не найден" });
-            }
-
-            // Только владелец может удалять участников
-            var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
-            if (currentUserMember?.Role != ProjectRole.Owner)
-            {
-                return Json(new { success = false, message = "Только владелец проекта может удалять участников" });
-            }
-
-            // Нельзя удалить владельца или самого себя
-            var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
-            if (targetMember == null)
-            {
-                return Json(new { success = false, message = "Участник не найден" });
-            }
-
-            if (targetMember.Role == ProjectRole.Owner || request.UserId == userId)
-            {
-                return Json(new { success = false, message = "Нельзя удалить владельца или себя из проекта" });
-            }
-
-            _context.ProjectMembers.Remove(targetMember);
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Участник удален из проекта" });
         }
     }
-}

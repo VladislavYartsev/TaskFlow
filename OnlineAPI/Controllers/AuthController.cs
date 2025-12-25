@@ -76,7 +76,9 @@ namespace OnlineAPI.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            const string UserScheme = "UserScheme";
+            await HttpContext.SignOutAsync(UserScheme);
             return RedirectToAction("Login", "Auth");
         }
 
