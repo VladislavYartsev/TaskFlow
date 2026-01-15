@@ -23,7 +23,6 @@ namespace OnlineAPI.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            // Проверяем доступ к проекту
             var hasAccess = await _context.ProjectMembers
                 .AnyAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
 

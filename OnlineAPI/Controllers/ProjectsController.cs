@@ -170,15 +170,12 @@ namespace OnlineAPI.Controllers
 
             try
             {
-                // Удаляем все задачи проекта
                 var tasks = _context.Tasks.Where(t => t.ProjectId == id);
                 _context.Tasks.RemoveRange(tasks);
 
-                // Удаляем всех участников проекта
                 var members = _context.ProjectMembers.Where(pm => pm.ProjectId == id);
                 _context.ProjectMembers.RemoveRange(members);
 
-                // Удаляем проект
                 _context.Projects.Remove(project);
 
                 await _context.SaveChangesAsync();

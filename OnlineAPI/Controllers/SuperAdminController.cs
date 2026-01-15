@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OnlineAPI.Entities;
 using System.Security.Claims;
 namespace OnlineAPI
 {
@@ -63,5 +64,37 @@ namespace OnlineAPI
             await HttpContext.SignOutAsync("SuperAdminScheme");
             return RedirectToAction("Login");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> GenerateCode() 
+        {
+            var Code = GenerateInviteCode();
+
+            var Invite = new Invitation
+            {
+                Code = Code,
+                IsUsed = false
+
+            };
+            await _context.Invitations.AddAsync(Invite);
+            await _context.SaveChangesAsync();
+
+            return Json(new { Code });
+        }
+
+        private string GenerateInviteCode() 
+        {
+            const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            var random = new Random();
+
+            return new string(Enumerable
+                .Repeat(chars, 8)
+                .Select(s => s[random.Next(s.Length)])
+                .ToArray()
+                );
+
+
+        }
+
     }
 }

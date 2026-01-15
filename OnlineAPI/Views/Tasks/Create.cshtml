@@ -1,4 +1,4 @@
-﻿@model OnlineAPI.Entities.Task
+﻿@model Entities.TaskCreateViewModel
 @{
     ViewData["Title"] = "Создать задачу";
     Layout = null;
@@ -65,15 +65,18 @@
                     </div>
 
                     <div class="form-group">
-                        <label asp-for="Assignee">Исполнитель</label>
-                        <select asp-for="Assignee" class="form-control" asp-items="ViewBag.Members">
+                        <label>Исполнители</label>
+                        <select asp-for="SelectedUsers"
+                            asp-items="Model.AvailableUsers"
+                            class="form-control"
+                            multiple
+                            size="6">
                         </select>
-                        <span asp-validation-for="Assignee" class="text-danger"></span>
                     </div>
-                    <input type="hidden" asp-for="ProjectId" value="@ViewBag.ProjectId" />
+                    <input type="hidden" asp-for="ProjectID" value="@ViewBag.ProjectId" />
 
                     <div class="form-actions">
-                        <a href="@Url.Action("Index", "Tasks")" class="btn btn-outline">Отмена</a>
+                        <a href="@Url.Action("Create", "Tasks", new { projectId = ViewBag.ProjectId })" class="btn btn-outline">Отмена</a>
                         <button type="submit" class="btn btn-primary">Создать задачу</button>
                     </div>
                 </form>

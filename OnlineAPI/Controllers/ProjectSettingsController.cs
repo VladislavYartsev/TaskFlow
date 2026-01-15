@@ -5,7 +5,6 @@
     using System.Security.Claims;
     using System.Threading.Tasks;
     using System.Linq;
-    using OnlineAPI.Entities;
 
     namespace OnlineAPI.Controllers
     {
@@ -79,7 +78,7 @@
                     return Json(new { success = false, message = "Проект не найден" });
                 }
 
-                // Проверяем права
+
                 var userMember = project.Members.FirstOrDefault(m => m.UserId == userId);
                 var canEdit = userMember?.Role == ProjectRole.Owner|| userMember?.Role == ProjectRole.Admin;
 
@@ -88,7 +87,6 @@
                     return Json(new { success = false, message = "Недостаточно прав для редактирования проекта" });
                 }
 
-                // Обновляем проект
                 project.Name = request.Name;
                 project.Description = request.Description;
                 project.UpdatedDate = DateTime.UtcNow;
@@ -153,14 +151,12 @@
                     return Json(new { success = false, message = "Проект не найден" });
                 }
 
-                // Только владелец может удалять участников
                 var currentUserMember = project.Members.FirstOrDefault(m => m.UserId == userId);
                 if (currentUserMember?.Role != ProjectRole.Owner)
                 {
                     return Json(new { success = false, message = "Только владелец проекта может удалять участников" });
                 }
 
-                // Нельзя удалить владельца или самого себя
                 var targetMember = project.Members.FirstOrDefault(m => m.UserId == request.UserId);
                 if (targetMember == null)
                 {

@@ -189,13 +189,14 @@
 
 <script>
     document.getElementById("gen").onclick = function () {
-        fetch('/superadmin/generate-code', {
+        fetch('/superadmin/generatecode', {
             method: 'POST'
         })
         .then(r => r.json())
         .then(d => {
-            document.getElementById("result").innerHTML =
-                "Код приглашения: <b>" + d.code + "</b>";
+            const result = document.getElementById("result");
+            result.style.display = "block";
+            result.innerHTML = "Код приглашения: <b>" + d.code + "</b>";
         });
     };
 </script>
