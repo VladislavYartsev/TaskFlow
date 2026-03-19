@@ -12,8 +12,8 @@ using OnlineAPI;
 namespace OnlineAPI.Migrations
 {
     [DbContext(typeof(AppContext))]
-    [Migration("20251021100702_2")]
-    partial class _2
+    [Migration("20260312071445_new-pull")]
+    partial class newpull
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,26 @@ namespace OnlineAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("OnlineAPI.Entities.Invitation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Invitations");
+                });
 
             modelBuilder.Entity("OnlineAPI.Entities.Project", b =>
                 {
@@ -98,10 +118,9 @@ namespace OnlineAPI.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Assignee")
+                    b.PrimitiveCollection<string[]>("Assignee")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("text[]");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -145,6 +164,9 @@ namespace OnlineAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<string>("InvintaionCode")
+                        .HasColumnType("text");
+
                     b.Property<int?>("OwnedProjectID")
                         .HasColumnType("integer");
 
@@ -174,13 +196,11 @@ namespace OnlineAPI.Migrations
 
             modelBuilder.Entity("OnlineAPI.Entities.Task", b =>
                 {
-                    b.HasOne("OnlineAPI.Entities.Project", "Project")
+                    b.HasOne("OnlineAPI.Entities.Project", null)
                         .WithMany("Tasks")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("OnlineAPI.Entities.Project", b =>

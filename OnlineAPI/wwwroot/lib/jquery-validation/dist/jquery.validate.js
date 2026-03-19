@@ -659,7 +659,7 @@ $.extend( $.validator, {
 				var isContentEditable = typeof $( this ).attr( "contenteditable" ) !== "undefined" && $( this ).attr( "contenteditable" ) !== "false";
 
 				if ( !name && validator.settings.debug && window.console ) {
-					console.error( "%o has no name assigned", this );
+					console.error( "%o has no name Assignee", this );
 				}
 
 				// Set form expando on contenteditable

@@ -5,7 +5,7 @@
 namespace OnlineAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class pop : Migration
+    public partial class newpull : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

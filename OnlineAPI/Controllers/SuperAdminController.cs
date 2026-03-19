@@ -28,7 +28,7 @@ namespace OnlineAPI
 
         [HttpPost]
         public async Task<IActionResult> Login(string login, string password)
-        { 
+        {
             if (login == "superadmin" && password == "Super123!")
             {
                 var claims = new List<Claim>
@@ -66,7 +66,7 @@ namespace OnlineAPI
         }
 
         [HttpPost]
-        public async Task<IActionResult> GenerateCode() 
+        public async Task<IActionResult> GenerateCode()
         {
             var Code = GenerateInviteCode();
 
@@ -82,7 +82,7 @@ namespace OnlineAPI
             return Json(new { Code });
         }
 
-        private string GenerateInviteCode() 
+        private string GenerateInviteCode()
         {
             const string chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
             var random = new Random();
@@ -95,6 +95,8 @@ namespace OnlineAPI
 
 
         }
+
+       
 
     }
 }

@@ -39,25 +39,29 @@ namespace OnlineAPI.Controllers
             {
                 return View(model);
             }
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Username == model.Username && u.Password == model.Password);
 
-            if (user != null)
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == model.Username);
+
+            // Проверяем пароль через BCrypt
+            if (user != null && BCrypt.Net.BCrypt.Verify(model.Password, user.Password))
             {
                 const string UserScheme = "UserScheme";
-                var claims = new List<Claim>
-                {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.Username),
-                };
 
-                var claimsIdentity = new ClaimsIdentity(
-                   claims, UserScheme);
+                var claims = new List<Claim>
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+        };
+
+                var claimsIdentity = new ClaimsIdentity(claims, UserScheme);
 
                 var authProperties = new AuthenticationProperties
                 {
                     IsPersistent = model.RememberMe,
-                    ExpiresUtc = model.RememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddMinutes(30)
+                    ExpiresUtc = model.RememberMe
+                        ? DateTime.UtcNow.AddDays(30)
+                        : DateTime.UtcNow.AddMinutes(30)
                 };
 
                 await HttpContext.SignInAsync(
@@ -65,9 +69,9 @@ namespace OnlineAPI.Controllers
                     new ClaimsPrincipal(claimsIdentity),
                     authProperties);
 
-
                 return RedirectToAction("Index", "Tasks");
             }
+
             ModelState.AddModelError("", "Invalid login attempt");
             return View(model);
         }

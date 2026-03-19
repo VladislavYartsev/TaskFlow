@@ -52,65 +52,63 @@ namespace OnlineAPI.Controllers
             }
             ViewBag.ProjectId = projectId;
             ViewBag.Members = await GetProjectMembers(projectId);
-                
-            return View();
+
+            var model = new TaskCreateViewModel
+            {
+                ProjectID = projectId,
+                AvailableUsers = _context.ProjectMembers
+    .Where(pm => pm.ProjectId == projectId)
+    .Select(pm => new SelectListItem
+    {
+        Value = pm.UserId.ToString(),
+        Text = pm.UserName
+    })
+    .ToList()
+
+            };
+
+            return View(model);
+
+
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Entities.Task task)
+        public async Task<IActionResult> Create(TaskCreateViewModel model)
         {
-            Console.WriteLine("=== CREATE ACTION STARTED ===");
-            Console.WriteLine($"ProjectId from form: {task.ProjectId}");
-
             if (!ModelState.IsValid)
             {
-                Console.WriteLine("=== MODEL STATE ERRORS ===");
-                foreach (var key in ModelState.Keys)
-                {
-                    var state = ModelState[key];
-                    foreach (var error in state.Errors)
+
+                model.AvailableUsers = _context.ProjectMembers
+                    .Where(pm => pm.ProjectId == model.ProjectID)
+                    .Select(pm => new SelectListItem
                     {
-                        Console.WriteLine($"Field: {key}, Error: {error.ErrorMessage}");
-                    }
-                }
-                ViewBag.ProjectId = task.ProjectId;
-                return View(task);
+                        Value = pm.UserId.ToString(),
+                        Text = pm.UserName
+                    }).ToList();
+
+                ViewBag.ProjectId = model.ProjectID;
+                return View(model);
             }
 
-            try
+            var lastTask = await _context.Tasks.OrderByDescending(t => t.Id).FirstOrDefaultAsync();
+            var nextId = lastTask?.Id + 1 ?? 1;
+
+            var task = new Entities.Task
             {
-                Console.WriteLine("=== TRYING TO SAVE ===");
+                Title = model.Title,
+                Description = model.Description,
+                Priority = model.Priority,
+                ProjectId = model.ProjectID,
+                TaskCode = $"TASK-{nextId}",
+                Status = Entities.TaskStatus.ToDo,
 
-                var project = await _context.Projects.FindAsync(task.ProjectId);
-                if (project == null)
-                {
-                    ModelState.AddModelError("ProjectId", "Указанный проект не существует");
-                    ViewBag.ProjectId = task.ProjectId;
-                    return View(task);
-                }
+                Assignee = model.SelectedUsers.Any() ? model.SelectedUsers.ToArray() : new string[] { }
+            };
 
+            _context.Tasks.Add(task);
+            await _context.SaveChangesAsync();
 
-                var lastTask = await _context.Tasks.OrderByDescending(t => t.Id).FirstOrDefaultAsync();
-                var nextId = lastTask?.Id + 1 ?? 1;
-                task.TaskCode = $"TASK-{nextId}";
-                task.Status = Entities.TaskStatus.ToDo;
-
-
-
-                _context.Add(task);
-                await _context.SaveChangesAsync();
-
-                Console.WriteLine("=== SAVE SUCCESSFUL ===");
-                return RedirectToAction(nameof(Index), new { projectId = task.ProjectId });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"=== EXCEPTION: {ex.Message} ===");
-                Console.WriteLine($"Inner exception: {ex.InnerException?.Message}");
-                ModelState.AddModelError("", $"Ошибка при сохранении: {ex.Message}");
-                ViewBag.ProjectId = task.ProjectId;
-                return View(task);
-            }
+            return RedirectToAction(nameof(Index), new { projectId = model.ProjectID });
         }
 
         // GET: Tasks/Edit/5

@@ -12,38 +12,37 @@ namespace OnlineAPI.Entities
             Done
         }
 
-        public enum TaskPriority
-        {
-            Low,
-            Medium,
-            High
-        }
+    public enum TaskPriority
+    {
+        Low = 0,
+        Medium = 1,
+        High = 2
+    }
 
-        public class Task
-        {
-            public int Id { get; set; }
+    public class Task
+    {
+        public int Id { get; set; }
 
 
-            [StringLength(100)]
-            public string Title { get; set; }
+        [StringLength(100)]
+        public string Title { get; set; }
 
-            [StringLength(500)]
-            public string Description { get; set; }
+        [StringLength(500)]
+        public string Description { get; set; }
 
-            public TaskStatus Status { get; set; }
+        public TaskStatus Status { get; set; }
 
-            public TaskPriority Priority { get; set; }
+        public TaskPriority Priority { get; set; }
+        
+        public string[] Assignee { get; set; } = Array.Empty<string>();
 
-            [StringLength(50)]
-            public string Assignee { get; set; }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 
-            public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? UpdatedDate { get; set; }
 
-            public DateTime? UpdatedDate { get; set; }
-
-            [StringLength(10)]
-            public string? TaskCode { get; set; }
-            public int ProjectId { get; set; }
+        [StringLength(10)]
+        public string? TaskCode { get; set; }
+        public int ProjectId { get; set; }
     }
 
         public class TaskMoveRequest
